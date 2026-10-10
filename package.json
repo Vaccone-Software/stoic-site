@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "shots": "bun scripts/screenshots.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "docc-plates": "bun scripts/docc-plates.ts"
   },
   "dependencies": {
     "effect": "4.0.2",
