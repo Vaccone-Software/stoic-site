@@ -44,3 +44,200 @@ html {
 canvas[role="img"] {
   image-rendering: pixelated;
 }
+
+/* Reading pages. Markdown arrives as HTML from the library's own files, so
+   the prose is styled here by element rather than by class. The measure is
+   72ch; tables and code may run to the column's width and scroll inside it,
+   so the page itself never does. */
+.doc {
+  font-size: 1.1875rem;
+  line-height: 1.62;
+  color: var(--color-body);
+  overflow-wrap: break-word;
+}
+.doc > * {
+  margin: 0 0 1.05em;
+}
+.doc > :not(.table-wrap):not(pre) {
+  max-width: 72ch;
+}
+.doc > :last-child {
+  margin-bottom: 0;
+}
+
+.doc h2,
+.doc h3,
+.doc h4,
+.doc h5,
+.doc h6 {
+  color: var(--color-print);
+  scroll-margin-top: 1.5rem;
+}
+.doc h2 {
+  margin: 2.1em 0 0.6em;
+  padding-top: 0.9em;
+  border-top: 1px solid var(--color-rule);
+  font-family: var(--font-display);
+  font-size: clamp(32px, 3.2vw, 44px);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.doc > h2:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+.doc h3 {
+  margin: 1.9em 0 0.4em;
+  font-size: 1.4rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.doc h4 {
+  margin: 1.6em 0 0.3em;
+  font-size: 1.1875rem;
+  font-style: italic;
+  font-weight: 500;
+}
+.doc h5,
+.doc h6 {
+  margin: 1.4em 0 0.3em;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-dim);
+}
+
+.doc strong {
+  color: var(--color-print);
+  font-weight: 600;
+}
+.doc a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-color: rgb(120 160 141 / 0.4);
+  text-underline-offset: 0.18em;
+}
+.doc a:hover {
+  text-decoration-color: currentColor;
+}
+
+.doc ul,
+.doc ol {
+  padding-left: 0;
+  list-style: none;
+}
+.doc li {
+  position: relative;
+  margin: 0.3em 0;
+  padding-left: 1.5em;
+}
+.doc ul > li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--color-accent);
+}
+.doc ol {
+  counter-reset: item;
+}
+.doc ol > li {
+  counter-increment: item;
+  padding-left: 2em;
+}
+.doc ol > li::before {
+  content: counter(item) ".";
+  position: absolute;
+  left: 0;
+  font-family: var(--font-mono);
+  font-size: 0.78em;
+  line-height: 2.3;
+  color: var(--color-accent);
+}
+.doc li > ul,
+.doc li > ol,
+.doc li > p {
+  margin: 0.3em 0;
+}
+
+.doc blockquote {
+  padding-left: 1.1em;
+  border-left: 2px solid var(--color-accent);
+  color: var(--color-dim);
+}
+.doc blockquote > :first-child {
+  margin-top: 0;
+}
+.doc blockquote > :last-child {
+  margin-bottom: 0;
+}
+.doc hr {
+  border: 0;
+  border-top: 1px solid var(--color-rule);
+}
+
+.doc code {
+  padding: 0.04em 0.18em;
+  background: var(--color-raised);
+  font-family: var(--font-mono);
+  font-size: 0.78em;
+  color: var(--color-print);
+  overflow-wrap: anywhere;
+}
+.doc pre {
+  margin: 0 0 1.3em;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--color-rule);
+  background: var(--color-raised);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+  tab-size: 4;
+}
+.doc pre code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+  color: inherit;
+  overflow-wrap: normal;
+}
+
+.doc .table-wrap {
+  margin-bottom: 1.3em;
+  overflow-x: auto;
+  border-top: 1px solid var(--color-rule);
+  border-bottom: 1px solid var(--color-rule);
+}
+.doc table {
+  width: 100%;
+  min-width: 38rem;
+  border-collapse: collapse;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.doc th,
+.doc td {
+  padding: 0.55rem 1rem 0.55rem 0;
+  vertical-align: top;
+  text-align: left;
+}
+.doc th {
+  border-bottom: 1px solid var(--color-rule-strong);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-dim);
+}
+.doc td {
+  border-top: 1px solid var(--color-rule);
+}
+.doc tbody tr:first-child td {
+  border-top: 0;
+}
+.doc td code {
+  font-size: 0.8em;
+  overflow-wrap: normal;
+}
