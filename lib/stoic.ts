@@ -13,9 +13,16 @@ import { route } from "./paths";
 export const repository = "Vaccone-Software/stoic";
 const repositoryUrl = `https://github.com/${repository}`;
 
-/** The Stoic checkout: `STOIC_DIR`, or `../stoic` beside this site. */
-export const stoicDir = () =>
-  resolve(process.cwd(), process.env.STOIC_DIR ?? "../stoic");
+/**
+ * The Stoic checkout: `STOIC_DIR`, else `../stoic` beside this site, else the
+ * copy `scripts/fetch-stoic.ts` downloads into `.stoic` (as on Vercel, which
+ * clones this repository alone).
+ */
+export const stoicDir = () => {
+  if (process.env.STOIC_DIR) return resolve(process.cwd(), process.env.STOIC_DIR);
+  const sibling = resolve(process.cwd(), "../stoic");
+  return existsSync(sibling) ? sibling : resolve(process.cwd(), ".stoic");
+};
 
 async function readStoic(path: string): Promise<string> {
   const file = resolve(stoicDir(), path);
@@ -24,7 +31,7 @@ async function readStoic(path: string): Promise<string> {
   } catch (cause) {
     throw new Error(
       `Cannot read ${file}. The site builds its pages from a checkout of ${repositoryUrl}: ` +
-        `point STOIC_DIR at one (default: ../stoic).`,
+        `point STOIC_DIR at one, or run "bun scripts/fetch-stoic.ts".`,
       { cause }
     );
   }
