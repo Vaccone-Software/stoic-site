@@ -9,7 +9,17 @@ import { mkdir } from "node:fs/promises";
 
 const root = join(import.meta.dir, "..", "out");
 const outDir = join(import.meta.dir, "..", "screenshots");
-const pages = ["/"];
+const pages = [
+  "/",
+  "/adopting/",
+  "/design/",
+  "/design/01-time-and-deadlines/",
+  "/design/06-validation/",
+  "/changelog/",
+  "/no-such-page/",
+];
+// Paths that must answer 404 with the site's own page.
+const missing = new Set(["/no-such-page/"]);
 const viewports = [
   { name: "phone", width: 390, height: 844 },
   { name: "laptop", width: 1440, height: 900 },
@@ -22,9 +32,13 @@ const server = Bun.serve({
     let path = new URL(request.url).pathname;
     if (path.endsWith("/")) path += "index.html";
     const file = Bun.file(join(root, decodeURIComponent(path)));
+    // Like GitHub Pages: a missing path answers 404 with the site's 404.html.
     return (await file.exists())
       ? new Response(file)
-      : new Response("Not found", { status: 404 });
+      : new Response(Bun.file(join(root, "404.html")), {
+          status: 404,
+          headers: { "Content-Type": "text/html" },
+        });
   },
 });
 
@@ -35,7 +49,11 @@ for (const viewport of viewports) {
   const page = await browser.newPage({
     viewport: { width: viewport.width, height: viewport.height },
   });
+  let navigating = "";
   page.on("console", (message) => {
+    // The browser logs a 404 document as a console error; that one is expected.
+    if (message.location().url === navigating && missing.has(new URL(navigating).pathname))
+      return;
     if (message.type() === "error")
       problems.push(`${viewport.name}: console error: ${message.text()}`);
   });
@@ -43,9 +61,13 @@ for (const viewport of viewports) {
     problems.push(`${viewport.name}: page error: ${error.message}`)
   );
   for (const path of pages) {
-    await page.goto(`http://localhost:${server.port}${path}`, {
-      waitUntil: "networkidle",
-    });
+    navigating = `http://localhost:${server.port}${path}`;
+    const response = await page.goto(navigating, { waitUntil: "networkidle" });
+    const expected = missing.has(path) ? 404 : 200;
+    if (response?.status() !== expected)
+      problems.push(
+        `${viewport.name} ${path}: answered ${response?.status()}, expected ${expected}`
+      );
     await page.waitForTimeout(1200);
     const name =
       path === "/" ? "home" : path.replaceAll("/", "-").replace(/^-|-$/g, "");

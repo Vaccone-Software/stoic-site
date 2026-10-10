@@ -11,6 +11,7 @@ bun install
 bun run dev            # http://localhost:3000
 bun run build          # static export to out/
 bun run shots          # photographs every page at phone, laptop and wide widths
+bun run links          # checks every internal link and #fragment in out/
 ```
 
 `bun run docc-plates ../stoic/Sources/Stoic/Stoic.docc/Resources` reprints the plates for the guide chapters in Stoic's DocC catalog, as 1-bit PNGs.
@@ -20,6 +21,9 @@ bun run shots          # photographs every page at phone, laptop and wide widths
 ## How it is put together
 
 - `content/site.ts`: everything the pages say, declared with Effect Schema and decoded at build time. Bad content fails the build.
+- `lib/stoic.ts`: reads the library's Markdown (`docs/Adopting.md`, `DESIGN.md`, `design/*.md`) from a Stoic checkout at build time, and the GitHub releases for `/changelog/`. `STOIC_DIR` names the checkout (default `../stoic`); `GITHUB_TOKEN` lifts the API rate limit. Links inside the Markdown are rewritten to this site's routes or to GitHub. A missing checkout, a malformed contract or a failed fetch stops the build.
+- `lib/markdown.ts`, `lib/highlight.ts`: Markdown to HTML with `marked`, GitHub heading ids, and code highlighted with `shiki` in a theme drawn from the palette.
+- `app/adopting`, `app/design`, `app/changelog`, `app/not-found.tsx`: the reading pages, framed by `components/DocPage.tsx`; the header and footer are shared with the landing page.
 - `lib/plates.ts`: the plate renderer. An engraving set in an arched marble niche, printed in two colours as live static.
 - `components/`: the plate canvas (animates only while on screen, still for reduced motion) and the install box.
 - `public/plates/`: the images, all public domain or CC0, credited on the page.

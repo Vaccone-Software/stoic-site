@@ -52,9 +52,23 @@ jobs:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
       - run: bun run lint
+      # The pages for Adopting, Design and the contracts are Stoic's own
+      # Markdown, read at build time. Checked out after lint so lint does not
+      # walk it.
+      - uses: actions/checkout@v5
+        with:
+          repository: Vaccone-Software/stoic
+          path: stoic
       - name: Build
-        # The project URL serves the site under /stoic-site.
+        # The project URL serves the site under /stoic-site. The token lifts
+        # the GitHub API's rate limit for the changelog's release fetch.
         run: bun run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: /stoic-site
+          STOIC_DIR: stoic
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Check links
+        run: bun run links
         env:
           NEXT_PUBLIC_BASE_PATH: /stoic-site
       - uses: actions/download-artifact@v5
