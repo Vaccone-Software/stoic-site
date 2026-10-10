@@ -75,6 +75,8 @@ jobs:
         with:
           name: docs
       - run: mkdir -p out/docs && tar -xzf docs.tgz -C out/docs
+      # The docs wear the site's favicon, not DocC's.
+      - run: cp app/favicon.ico out/docs/favicon.ico && cp app/icon.svg out/docs/favicon.svg
       - uses: actions/upload-pages-artifact@v4
         if: github.ref == 'refs/heads/main'
         with:
