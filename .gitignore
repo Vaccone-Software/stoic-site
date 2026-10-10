@@ -46,3 +46,4 @@ screenshots/
 
 # Stoic downloaded by scripts/fetch-stoic.ts
 /.stoic
+/public/docs
