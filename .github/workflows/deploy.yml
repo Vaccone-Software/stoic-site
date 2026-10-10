@@ -34,10 +34,13 @@ jobs:
             --output-path docs --hosting-base-path stoic-site/docs
           # The transform writes the renderer's empty theme over the catalog's.
           cp Sources/Stoic/Stoic.docc/theme-settings.json docs/
+          # DocC names pages after symbols, colons included, which artifacts
+          # refuse; a tarball carries them.
+          tar -czf docs.tgz -C docs .
       - uses: actions/upload-artifact@v5
         with:
           name: docs
-          path: docs
+          path: docs.tgz
 
   build:
     needs: docs
@@ -57,7 +60,7 @@ jobs:
       - uses: actions/download-artifact@v5
         with:
           name: docs
-          path: out/docs
+      - run: mkdir -p out/docs && tar -xzf docs.tgz -C out/docs
       - uses: actions/upload-pages-artifact@v4
         if: github.ref == 'refs/heads/main'
         with:
