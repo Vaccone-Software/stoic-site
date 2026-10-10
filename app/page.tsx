@@ -1,15 +1,9 @@
 import { Install } from "@/components/Install";
 import { PlateCanvas } from "@/components/PlateCanvas";
+import { SiteFooter } from "@/components/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader";
 import { plateById, site } from "@/content/site";
 import { docs } from "@/lib/paths";
-
-const nav = [
-  { label: "Docs", href: docs() },
-  { label: "Adopting", href: `${site.repository}/blob/main/docs/Adopting.md` },
-  { label: "Design", href: `${site.repository}/blob/main/DESIGN.md` },
-  { label: "Changelog", href: `${site.repository}/releases` },
-  { label: "GitHub", href: site.repository },
-];
 
 export default function Home() {
   const atlas = plateById("atlas");
@@ -18,25 +12,7 @@ export default function Home() {
       {/* First screen: everything needed to understand Stoic, without scrolling. */}
       <section className="grid min-h-[min(100svh,800px)] grid-cols-1 border-b border-rule md:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
         <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto] gap-5 px-5 pt-5 pb-8 md:px-10 lg:px-12">
-          <header className="flex flex-wrap items-center justify-between gap-3">
-            <span className="font-display text-[30px] leading-none tracking-[0.14em]">
-              STOIC
-            </span>
-            <nav
-              aria-label="Primary"
-              className="flex flex-wrap gap-5 font-mono text-[12.5px] text-dim"
-            >
-              {nav.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className="hover:text-print"
-                >
-                  {item.label}
-                </a>
-              ))}
-            </nav>
-          </header>
+          <SiteHeader />
           <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-center gap-5 py-6">
             <p className="font-mono text-[12.5px] text-accent">
               Swift package · {site.version} · Apache-2.0
@@ -188,17 +164,7 @@ export default function Home() {
         ))}
       </section>
 
-      <footer className="grid gap-6 px-5 pt-10 pb-8 md:px-10 lg:px-12">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <p className="font-display text-[clamp(36px,4.4vw,60px)] leading-[0.88] uppercase">
-            Reliable async code
-            <br />
-            <span className="text-accent">for Swift.</span>
-          </p>
-          <span className="font-mono text-xs text-dim">
-            Stoic {site.version} · Vaccone Software · Apache-2.0
-          </span>
-        </div>
+      <SiteFooter>
         <details className="font-mono text-xs text-dim">
           <summary className="cursor-pointer hover:text-print">
             Image credits
@@ -213,7 +179,7 @@ export default function Home() {
             ))}
           </ul>
         </details>
-      </footer>
+      </SiteFooter>
     </main>
   );
 }

@@ -28,7 +28,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Stoic: reliable async code for Swift",
+  metadataBase: new URL("https://vaccone-software.github.io/stoic-site/"),
+  title: {
+    default: "Stoic: reliable async code for Swift",
+    template: "%s · Stoic",
+  },
   description:
     "A Swift library for async code that has to keep working: timeouts that cancel, retries with budgets, cleanup that always runs, supervision, validated data, and deterministic tests.",
 };
