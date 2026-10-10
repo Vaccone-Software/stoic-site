@@ -1,26 +1,46 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Two colours and one accent. Lamp black is the ground, a little warm; bone
+   is the aged paper the plates were pulled on, and everything read is set in
+   it. Verdigris, the green bronze weathers to, marks the few things that must
+   stand out: the key word, the primary action, code keywords. Static lives
+   only inside the plates; the ground is always flat. */
+@theme {
+  --color-ground: #13110f;
+  --color-raised: #1a1815;
+  --color-print: #e6ddca;
+  --color-body: #cfc6b3;
+  --color-dim: #9b917e;
+  --color-rule: rgb(230 221 202 / 0.14);
+  --color-rule-strong: rgb(230 221 202 / 0.3);
+  --color-accent: #78a08d;
+
+  --font-display: var(--font-league-gothic), "Oswald", Impact, sans-serif;
+  --font-text: var(--font-eb-garamond), Garamond, Georgia, serif;
+  --font-plate: var(--font-im-fell), Garamond, Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html {
+  background-color: var(--color-ground);
+  color: var(--color-print);
+  font-family: var(--font-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+::selection {
+  background: var(--color-accent);
+  color: var(--color-ground);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* Plates are printed at a fixed resolution; keep the grain crisp when scaled. */
+canvas[role="img"] {
+  image-rendering: pixelated;
 }
