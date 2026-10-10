@@ -6,7 +6,7 @@ import { Schema } from "effect";
 
 const PlateId = Schema.Literals([
   "atlas",
-  "saturn",
+  "time",
   "sisyphus",
   "hydra",
   "reason",
@@ -98,16 +98,16 @@ export const site = Schema.decodeUnknownSync(Content)({
       invert: false,
     },
     {
-      id: "saturn",
+      id: "time",
       numeral: "II",
-      caption: "Saturn, after Goya",
+      caption: "Time among the statues",
       description:
-        "Francisco de Goya's painting of Saturn devouring his son, in an arched niche, partly scraped back to the stone.",
+        "An engraving of winged Time raising his scythe among classical statues, in an arched niche, partly scraped back to the stone.",
       credit:
-        "Francisco de Goya, Saturno devorando a su hijo, 1819–23, Museo del Prado",
-      license: "Public domain",
-      scrape: 0.12,
-      invert: false,
+        "Prudence restrains Time from destroying ancient statues, Rijksmuseum RP-P-1878-A-1201",
+      license: "CC0",
+      scrape: 0.1,
+      invert: true,
     },
     {
       id: "sisyphus",
@@ -154,7 +154,7 @@ export const site = Schema.decodeUnknownSync(Content)({
         "Bound how long any async work may take. Work past its deadline is cancelled with a reason, and calls that ignore cancellation are abandoned and counted.",
       code: "try await withTimeout(.seconds(2)) { … }",
       apis: ["withTimeout", "Deadline", "abandoningAfter"],
-      plate: "saturn",
+      plate: "time",
     },
     {
       area: "Retries",
