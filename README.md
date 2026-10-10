@@ -13,6 +13,8 @@ bun run build          # static export to out/
 bun run shots          # photographs every page at phone, laptop and wide widths
 ```
 
+`bun run docc-plates ../stoic/Sources/Stoic/Stoic.docc/Resources` reprints the plates for the guide chapters in Stoic's DocC catalog, as 1-bit PNGs.
+
 `bun run shots` also fails on console errors and on anything wider than the page. Look at the screenshots in `screenshots/` before calling a visual change done.
 
 ## How it is put together
@@ -21,6 +23,7 @@ bun run shots          # photographs every page at phone, laptop and wide widths
 - `lib/plates.ts`: the plate renderer. An engraving set in an arched marble niche, printed in two colours as live static.
 - `components/`: the plate canvas (animates only while on screen, still for reduced motion) and the install box.
 - `public/plates/`: the images, all public domain or CC0, credited on the page.
+- `/docs`: Stoic's DocC reference. The deploy workflow builds it from the library's `main` on an Xcode 27 runner and copies it into the export; it is not in this repository.
 
 ## Style
 
