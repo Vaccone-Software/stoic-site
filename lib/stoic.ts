@@ -76,7 +76,9 @@ function rewriteSrc(src: string, from: string): string {
 
 /** A Markdown file of the library, as HTML, with the site's links. */
 export async function renderDoc(path: string): Promise<Rendered> {
-  const [source, contracts] = await Promise.all([readStoic(path), loadContracts()]);
+  const [file, contracts] = await Promise.all([readStoic(path), loadContracts()]);
+  // A hand-written "Contents" list repeats the page's own table of contents.
+  const source = file.replace(/^## Contents\n[\s\S]*?(?=^## )/m, "");
   const slugs = new Set(contracts.map((contract) => contract.slug));
   return renderMarkdown(source, {
     rewriteHref: (href) => rewriteHref(href, path, slugs),
