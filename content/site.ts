@@ -44,6 +44,8 @@ export class Primitive extends Schema.Class<Primitive>("Primitive")({
   code: Schema.NonEmptyString,
   apis: Schema.NonEmptyArray(Schema.NonEmptyString),
   plate: PlateId,
+  /** The guide chapter in the documentation that covers it. */
+  chapter: Schema.Literals(["time", "failure", "resources", "lifecycle", "testing"]),
 }) {}
 
 /** A figure that is easy to check against the repository. */
@@ -155,6 +157,7 @@ export const site = Schema.decodeUnknownSync(Content)({
       code: "try await withTimeout(.seconds(2)) { … }",
       apis: ["withTimeout", "Deadline", "abandoningAfter"],
       plate: "time",
+      chapter: "time",
     },
     {
       area: "Retries",
@@ -164,6 +167,7 @@ export const site = Schema.decodeUnknownSync(Content)({
       code: "try await retry(.exponential(base: .milliseconds(200)).attempts(4)) { … }",
       apis: ["retry", "Schedule", "RetryBudget", "CircuitBreaker"],
       plate: "sisyphus",
+      chapter: "failure",
     },
     {
       area: "Supervision",
@@ -173,6 +177,7 @@ export const site = Schema.decodeUnknownSync(Content)({
       code: 'try await Supervisor(label: "app") { Child("sync") { … } }.run()',
       apis: ["Supervisor", "StateMachine", "ServiceGraph"],
       plate: "hydra",
+      chapter: "lifecycle",
     },
     {
       area: "Testing",
@@ -182,6 +187,7 @@ export const site = Schema.decodeUnknownSync(Content)({
       code: "try await simulate(seeds: 0..<500) { … }",
       apis: ["simulate", "TestClock", "expectTrace"],
       plate: "reason",
+      chapter: "testing",
     },
   ],
   facts: [

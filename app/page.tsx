@@ -1,9 +1,11 @@
 import { Install } from "@/components/Install";
 import { PlateCanvas } from "@/components/PlateCanvas";
 import { plateById, site } from "@/content/site";
+import { docs } from "@/lib/paths";
 
 const nav = [
-  { label: "Guide", href: `${site.repository}/blob/main/docs/Adopting.md` },
+  { label: "Docs", href: docs() },
+  { label: "Adopting", href: `${site.repository}/blob/main/docs/Adopting.md` },
   { label: "Design", href: `${site.repository}/blob/main/DESIGN.md` },
   { label: "Changelog", href: `${site.repository}/releases` },
   { label: "GitHub", href: site.repository },
@@ -67,10 +69,10 @@ export default function Home() {
             />
             <div className="flex flex-wrap items-center gap-3">
               <a
-                href={`${site.repository}/blob/main/docs/Adopting.md`}
+                href={docs()}
                 className="bg-accent px-4 py-2.5 font-mono text-[13px] font-medium text-ground hover:brightness-110"
               >
-                Read the guide
+                Read the docs
               </a>
               <a
                 href={site.repository}
@@ -152,6 +154,12 @@ export default function Home() {
                 <pre className="border border-rule bg-raised px-2.5 py-2 font-mono text-[11.5px] leading-relaxed break-words whitespace-pre-wrap">
                   <code>{primitive.code}</code>
                 </pre>
+                <a
+                  href={docs(primitive.chapter)}
+                  className="font-mono text-[13px] text-accent hover:underline"
+                >
+                  Guide: {primitive.chapter[0].toUpperCase() + primitive.chapter.slice(1)} →
+                </a>
                 <p className="font-plate text-sm text-dim italic">
                   Pl. {plate.numeral} · {plate.caption}
                 </p>
