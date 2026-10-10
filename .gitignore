@@ -1,5 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# a checkout of the library, for STOIC_DIR=stoic (CI does this)
+/stoic/
+
 # dependencies
 /node_modules
 /.pnp

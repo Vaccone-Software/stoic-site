@@ -8,14 +8,19 @@
     "start": "next start",
     "lint": "eslint",
     "shots": "bun scripts/screenshots.ts",
+    "links": "bun scripts/links.ts",
     "typecheck": "tsc --noEmit",
-    "docc-plates": "bun scripts/docc-plates.ts"
+    "docc-plates": "bun scripts/docc-plates.ts",
+    "icons": "bun scripts/icons.ts"
   },
   "dependencies": {
     "effect": "4.0.2",
+    "github-slugger": "^2.0.0",
+    "marked": "^18.1.0",
     "next": "16.4.0",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "shiki": "^4.5.0"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

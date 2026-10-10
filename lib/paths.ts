@@ -10,3 +10,9 @@ export const asset = (path: string) => `${basePath}${path}`;
 /** A page of the DocC documentation, which is published under `/docs`. */
 export const docs = (path = "") =>
   `${basePath}/docs/documentation/stoic/${path ? `${path}/` : ""}`;
+
+/**
+ * A page of this site under the base path, for the places a `next/link`
+ * cannot go: hrefs inside rendered Markdown.
+ */
+export const route = (path: string) => `${basePath}${path}`;
