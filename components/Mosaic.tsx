@@ -10,6 +10,7 @@ import {
 } from "react";
 import {
   SEED,
+  SWELL,
   failures,
   layout,
   mend,
@@ -137,14 +138,6 @@ function Gold({ inlay }: { readonly inlay: Inlay }) {
   return (
     <>
       <path d={inlay.shape} fill="url(#mosaic-gold)" />
-      <path
-        d={inlay.spine}
-        fill="none"
-        stroke="#fff4cf"
-        strokeWidth="0.6"
-        strokeOpacity="0.55"
-        strokeLinecap="round"
-      />
       {inlay.flecks.map((fleck, i) => (
         <circle
           key={i}
@@ -515,11 +508,11 @@ export function Mosaic({
         const size = sizes[i];
         return size && size.width > 0 && size.height > 0
           ? crackList[i]!.map((crack) =>
-              mend(size.width, size.height, crack)
+              mend(size.width, size.height, crack, floor?.tiles[i]?.placement.local)
             )
           : [];
       }),
-    [tiles, sizes, crackList]
+    [tiles, sizes, crackList, floor]
   );
 
   const hovered = !mobile && hover !== null ? tiles[hover] : undefined;
@@ -549,97 +542,63 @@ export function Mosaic({
             y2="520"
             spreadMethod="reflect"
           >
-            <stop offset="0" stopColor="#5c4219" />
-            <stop offset="0.12" stopColor="#a07a33" />
-            <stop offset="0.24" stopColor="#e7c878" />
-            <stop offset="0.31" stopColor="#fff0b8" />
-            <stop offset="0.4" stopColor="#c69a45" />
-            <stop offset="0.55" stopColor="#7d5a24" />
-            <stop offset="0.68" stopColor="#d9b25e" />
-            <stop offset="0.77" stopColor="#f6dc95" />
-            <stop offset="0.88" stopColor="#9c7432" />
-            <stop offset="1" stopColor="#d0a854" />
+            <stop offset="0" stopColor="#9a7830" />
+            <stop offset="0.2" stopColor="#c9a444" />
+            <stop offset="0.34" stopColor="#e0c46c" />
+            <stop offset="0.5" stopColor="#bb9a3d" />
+            <stop offset="0.68" stopColor="#d2b252" />
+            <stop offset="0.84" stopColor="#a8832f" />
+            <stop offset="1" stopColor="#c9a444" />
           </linearGradient>
           <filter
             id="mosaic-gilt"
-            x="-30%"
-            y="-30%"
-            width="160%"
-            height="160%"
+            x="-10%"
+            y="-10%"
+            width="120%"
+            height="120%"
             colorInterpolationFilters="sRGB"
           >
             <feGaussianBlur
               in="SourceAlpha"
-              stdDeviation="0.9"
+              stdDeviation="1"
               result="relief"
-            />
-            <feSpecularLighting
-              in="relief"
-              surfaceScale="2.6"
-              specularConstant="1.15"
-              specularExponent="24"
-              lightingColor="#fff3cc"
-              result="spec"
-            >
-              <feDistantLight azimuth="225" elevation="40" />
-            </feSpecularLighting>
-            <feComposite
-              in="spec"
-              in2="SourceAlpha"
-              operator="in"
-              result="shine"
             />
             <feDiffuseLighting
               in="relief"
-              surfaceScale="2.2"
+              surfaceScale="1.2"
               diffuseConstant="1"
               lightingColor="#ffffff"
               result="shade"
             >
-              <feDistantLight azimuth="225" elevation="48" />
+              <feDistantLight azimuth="225" elevation="52" />
             </feDiffuseLighting>
             <feComposite
               in="SourceGraphic"
               in2="shade"
               operator="arithmetic"
-              k1="1.15"
+              k1="1.28"
               k2="0"
               k3="0"
               k4="0"
               result="modelled"
             />
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="1.4"
-              numOctaves="2"
-              seed="11"
-              result="grain"
-            />
-            <feColorMatrix
-              in="grain"
-              type="matrix"
-              values="0 0 0 0 0.42  0 0 0 0 0.3  0 0 0 0 0.1  0 0 0 -0.9 0.62"
-              result="hammer"
-            />
+            <feSpecularLighting
+              in="relief"
+              surfaceScale="2"
+              specularConstant="0.4"
+              specularExponent="9"
+              lightingColor="#ffe9b0"
+              result="sheen"
+            >
+              <feDistantLight azimuth="225" elevation="42" />
+            </feSpecularLighting>
             <feComposite
-              in="hammer"
-              in2="SourceAlpha"
-              operator="in"
-              result="hammered"
-            />
-            <feBlend
               in="modelled"
-              in2="hammered"
-              mode="multiply"
-              result="metal"
-            />
-            <feComposite
-              in="shine"
-              in2="metal"
+              in2="sheen"
               operator="arithmetic"
               k1="0"
               k2="1"
-              k3="1"
+              k3="0.5"
               k4="0"
               result="lit"
             />
@@ -651,11 +610,11 @@ export function Mosaic({
             />
             <feDropShadow
               in="gold"
-              dx="0.4"
-              dy="0.9"
-              stdDeviation="0.7"
+              dx="0.2"
+              dy="0.6"
+              stdDeviation="0.6"
               floodColor="#000"
-              floodOpacity="0.7"
+              floodOpacity="0.4"
             />
           </filter>
         </defs>
@@ -836,6 +795,7 @@ export function Mosaic({
               <polygon
                 key={tiles[i]!.id}
                 className={hover === i ? "on" : undefined}
+                style={{ strokeWidth: floor.weight * SWELL + 3.4 }}
                 points={placed.outline
                   .map((point) => point.join(","))
                   .join(" ")}
