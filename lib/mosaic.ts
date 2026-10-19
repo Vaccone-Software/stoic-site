@@ -42,14 +42,18 @@ const GRAIN = 2.4;
  * push is small against a long piece, so the whole keeps its course and turns
  * only a little at a time; it is larger against a short one, so up close the
  * edge is ragged, with the small steps and notches of a coast. `bend` widens
- * the large turns.
+ * the large turns. `texture` says how ragged the break is, from 0 to 1, a
+ * fraction of the way along it: a real break is clean for long runs and
+ * ragged in places. Without it the break is ragged all along.
  */
 export function fracture(
   a: Point,
   b: Point,
   rnd: () => number,
-  bend = 1
+  bend = 1,
+  texture?: (along: number) => number
 ): Point[] {
+  const span = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
   let line: Point[] = [a, b];
   for (let level = 0; level < 12; level++) {
     const next: Point[] = [line[0]!];
@@ -65,14 +69,25 @@ export function fracture(
         continue;
       }
       split = true;
+      const mask = texture
+        ? texture(
+            Math.min(
+              1,
+              Math.max(
+                0,
+                ((((p[0] + q[0]) / 2 - a[0]) * (b[0] - a[0]) +
+                  ((p[1] + q[1]) / 2 - a[1]) * (b[1] - a[1])) /
+                  (span * span))
+              )
+            )
+          )
+        : 1;
       const k =
         length > 48
           ? 0.055 * bend
           : length > 14
-          ? 0.08 * Math.sqrt(bend)
-          : length > 5
-          ? 0.13
-          : 0.2;
+          ? 0.08 * Math.sqrt(bend) * (texture ? 0.55 + 0.45 * mask : 1)
+          : (length > 5 ? 0.13 : 0.2) * (texture ? 0.5 * (0.15 + 0.85 * mask) : 1);
       // Large pieces turn by a rounded amount, clustered near nothing; small
       // ones step by anything up to the full amount, which is what makes an edge ragged.
       const push =
@@ -100,7 +115,20 @@ function breakBetween(a: Point, b: Point, straight: boolean): Point[] {
   if (straight) return [a, b];
   const flip = a[0] > b[0] || (a[0] === b[0] && a[1] > b[1]);
   const [p, q] = flip ? [b, a] : [a, b];
-  const line = fracture(p, q, stream(placeHash(p, q)));
+  const seed = placeHash(p, q),
+    length = Math.hypot(q[0] - p[0], q[1] - p[1]);
+  // Where this break is ragged: a stretch or two somewhere along it, and near its ends, where it meets others.
+  const marks = stream(seed ^ 0x7e57);
+  const stretches = Array.from({ length: marks() < 0.4 ? 2 : 1 }, () => ({
+    at: 0.12 + 0.76 * marks(),
+    reach: 0.07 + 0.09 * marks(),
+  }));
+  const texture = (t: number) =>
+    Math.max(
+      0.8 * Math.exp(-(Math.min(t, 1 - t) * length) / 14),
+      ...stretches.map(({ at, reach }) => Math.exp(-(((t - at) / reach) ** 2)))
+    );
+  const line = fracture(p, q, stream(seed), 1, texture);
   return flip ? line.reverse() : line;
 }
 
@@ -503,7 +531,7 @@ export function ribbon(
     return k;
   };
 
-  const raggedness = 0.065 * width + 0.1;
+  const raggedness = 0.045 * width + 0.1;
   const left: Point[] = [],
     right: Point[] = [];
   const half = width / 2;
