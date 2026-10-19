@@ -884,18 +884,28 @@ export interface Failure {
   readonly crack: Crack;
 }
 
+/** A tile carries at most this many seams, so its plate still reads under the gold. */
+export const SEAMS_PER_TILE = 2;
+
 /**
- * The failures of `SEED`, one at a time, never the same tile twice running.
+ * The failures of `SEED`, one at a time, never the same tile twice running
+ * and never a tile that already has `SEAMS_PER_TILE` seams. The sequence ends,
+ * with `null`, after as many failures as there are tiles: the floor is mended.
  * Every call to this starts the same sequence again.
  */
-export function failures(tiles: number): () => Failure {
+export function failures(tiles: number): () => Failure | null {
   const rnd = stream(SEED);
+  const seams = Array.from({ length: tiles }, () => 0);
   let last = -1;
+  let count = 0;
   return () => {
+    if (count >= tiles) return null;
     let tile: number;
     do tile = Math.floor(rnd() * tiles);
-    while (tile === last && tiles > 1);
+    while ((tile === last && tiles > 1) || seams[tile]! >= SEAMS_PER_TILE);
     last = tile;
+    seams[tile]! += 1;
+    count += 1;
     return { tile, crack: Array.from({ length: 12 }, () => rnd()) };
   };
 }

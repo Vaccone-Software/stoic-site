@@ -128,10 +128,16 @@ function settle(tiles: number) {
   let last = -1;
   for (let k = 0; k < SETTLED_FAILURES; k++) {
     const failure = next();
+    if (!failure) break;
     cracks[failure.tile]!.push(failure.crack);
     last = failure.tile;
   }
-  return { cracks, repairs: SETTLED_FAILURES, event: { tile: last, ok: true } };
+  return {
+    cracks,
+    repairs: SETTLED_FAILURES,
+    event: { tile: last, ok: true },
+    whole: false,
+  };
 }
 
 function Gold({ inlay }: { readonly inlay: Inlay }) {
@@ -154,7 +160,8 @@ function Gold({ inlay }: { readonly inlay: Inlay }) {
 /**
  * Stoic's parts as a floor of engraved tiles around the name. Each plate is
  * printed as live static; every seam is a gold inlay; every few seconds a
- * seeded failure tears one tile and leaves it mended in gold. Hover a tile,
+ * seeded failure tears one tile and leaves it mended in gold, until the
+ * sequence ends and the floor rests whole. Hover a tile,
  * or on a phone tap it, to read what it is.
  */
 export function Mosaic({
@@ -200,6 +207,8 @@ export function Mosaic({
     null
   );
   const [failing, setFailing] = useState<Failing | null>(null);
+  /** The sequence has ended: every failure is mended and none is due. */
+  const [whole, setWhole] = useState(false);
   const engine = useRef(failures(tiles.length));
   const pending = useRef<{ tile: number; crack: Crack } | null>(null);
 
@@ -212,6 +221,7 @@ export function Mosaic({
     repairs: settled?.repairs ?? repairs,
     event: settled?.event ?? event,
     failing: settled ? null : failing,
+    whole: settled?.whole ?? whole,
   };
 
   const active = pageVisible && floorVisible;
@@ -229,9 +239,15 @@ export function Mosaic({
       setFailing(null);
     };
     let settling: ReturnType<typeof setTimeout> | undefined;
+    let every: ReturnType<typeof setInterval> | undefined;
     const fail = () => {
       mended();
       const next = engine.current();
+      if (!next) {
+        clearInterval(every);
+        setWhole(true);
+        return;
+      }
       pending.current = next;
       setEvent({ tile: next.tile, ok: false });
       setFailing({ tile: next.tile, start: performance.now() });
@@ -239,7 +255,6 @@ export function Mosaic({
     };
     // A failure that a pause interrupted is mended before the next begins.
     mended();
-    let every: ReturnType<typeof setInterval> | undefined;
     const first = setTimeout(() => {
       fail();
       every = setInterval(fail, FAILURE_EVERY_MS);
@@ -258,6 +273,7 @@ export function Mosaic({
     setRepairs(0);
     setEvent(null);
     setFailing(null);
+    setWhole(false);
     setRound((n) => n + 1);
   };
 
@@ -671,9 +687,11 @@ export function Mosaic({
                   </span>
                 </span>
                 <span className="use">
-                  {shown.event.ok
-                    ? "Mended in gold, and the seam kept."
-                    : "Failing…"}
+                  {!shown.event.ok
+                    ? "Failing…"
+                    : shown.whole
+                      ? "Every failure mended. Replay to break it again."
+                      : "Mended in gold, and the seam kept."}
                 </span>
               </>
             ) : (
