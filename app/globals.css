@@ -3,8 +3,10 @@
 /* Two colours and one accent. Lamp black is the ground, a little warm; bone
    is the aged paper the plates were pulled on, and everything read is set in
    it. Verdigris, the green bronze weathers to, marks the few things that must
-   stand out: the key word, the primary action, code keywords. Static lives
-   only inside the plates; the ground is always flat. */
+   stand out: the key word, the primary action, code keywords. Gold appears
+   only in the home page's mosaic, where it mends what fails; fault is the
+   colour of the failure. Static lives only inside the plates; the ground is
+   always flat. */
 @theme {
   --color-ground: #13110f;
   --color-raised: #1a1815;
@@ -14,6 +16,8 @@
   --color-rule: rgb(230 221 202 / 0.14);
   --color-rule-strong: rgb(230 221 202 / 0.3);
   --color-accent: #78a08d;
+  --color-gold: #c9a45c;
+  --color-fault: #d9a08c;
 
   --font-display: var(--font-league-gothic), "Oswald", Impact, sans-serif;
   --font-text: var(--font-eb-garamond), Garamond, Georgia, serif;
@@ -240,4 +244,407 @@ canvas[role="img"] {
 .doc td code {
   font-size: 0.8em;
   overflow-wrap: normal;
+}
+
+/* The mosaic on the home page. On a wide screen the floor fills the viewport
+   under the header: a 10 by 5 floor of engraved tiles, laid out in script
+   (components/Mosaic.tsx) because each is a slightly irregular quadrilateral,
+   around a seal that holds the name. On a phone it is a two-column grid on
+   gold grout, the seal first, and a tap opens a tile in place. */
+.mosaic {
+  position: relative;
+  flex: 1;
+  min-height: 540px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #0d0c0a;
+}
+@media (min-width: 901px) {
+  /* Until the floor has been measured the tiles have no place to be. */
+  .mosaic:not(.ready) > :not(.mosaic-defs) {
+    visibility: hidden;
+  }
+}
+.mosaic-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.mosaic .tile,
+.mosaic .seal {
+  position: absolute;
+}
+.mosaic .tile {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--color-ground);
+  color: inherit;
+  font: inherit;
+  cursor: default;
+}
+.mosaic .tile canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+.mosaic .tile svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.mosaic .tile .label {
+  position: absolute;
+  z-index: 1;
+  padding: 3px 7px 4px;
+  background: rgb(19 17 15 / 0.88);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  color: var(--color-print);
+  pointer-events: none;
+}
+.mosaic .tile.failing .label {
+  color: var(--color-fault);
+}
+.mosaic .tile:focus-visible {
+  outline: none;
+}
+.mosaic .tile .desc {
+  display: none;
+}
+.mosaic .seams,
+.mosaic .outline {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.mosaic .seams {
+  z-index: 4;
+}
+.mosaic .outline {
+  z-index: 6;
+}
+/* Wide enough to cover the gold seam it sits on. */
+.mosaic .outline polygon {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.mosaic .outline polygon.on {
+  opacity: 1;
+}
+
+/* The seal scales to the space it has, so nothing in it is ever cut off or
+   moves: the legend has a fixed height, and the container queries drop the
+   muted line, then the legend, only when there is no room for them. */
+.mosaic .seal {
+  z-index: 3;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  container-type: size;
+  background: var(--color-ground);
+}
+.mosaic .seal .in {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto auto auto 6.2em auto;
+  align-items: start;
+  justify-items: center;
+  row-gap: 0.55em;
+  width: 100%;
+  max-width: 44em;
+  padding: 1em 2em;
+  font-size: clamp(9px, min(3.05cqh, 2.15cqw), 16px);
+  text-align: center;
+}
+.mosaic .seal h1 {
+  padding-left: 0.18em;
+  font-family: var(--font-display);
+  font-size: min(26cqh, 19cqw);
+  font-weight: 400;
+  line-height: 0.8;
+  letter-spacing: 0.18em;
+}
+.mosaic .seal .motto {
+  font-family: var(--font-plate);
+  font-size: 1.45em;
+  font-style: italic;
+  color: var(--color-print);
+}
+.mosaic .seal .muted {
+  font-size: 0.97em;
+  line-height: 1.4;
+  color: var(--color-dim);
+}
+.mosaic .seal .muted b {
+  font-weight: 500;
+  color: var(--color-accent);
+}
+.mosaic .pkg {
+  display: flex;
+  align-items: stretch;
+  max-width: 100%;
+  border: 1px solid var(--color-rule);
+  background: var(--color-raised);
+}
+.mosaic .pkg code {
+  padding: 0.6em 0.8em;
+  font-family: var(--font-mono);
+  font-size: 0.76em;
+  color: var(--color-body);
+  overflow-wrap: anywhere;
+}
+.mosaic .pkg code em {
+  font-style: normal;
+  color: var(--color-gold);
+}
+.mosaic .pkg button {
+  width: 6.4em;
+  padding: 0 1em;
+  border: 0;
+  border-left: 1px solid var(--color-rule);
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 0.74em;
+  color: var(--color-print);
+  cursor: pointer;
+}
+.mosaic .pkg button:hover {
+  color: var(--color-accent);
+}
+.mosaic .legend {
+  display: grid;
+  grid-template-rows: 1.5em 1fr auto;
+  row-gap: 0.1em;
+  width: 100%;
+  height: 6.2em;
+  padding-top: 0.6em;
+  overflow: hidden;
+  border-top: 1px solid var(--color-rule);
+}
+.mosaic .legend .name {
+  align-self: center;
+  font-family: var(--font-display);
+  font-size: 1.5em;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.mosaic .legend .what {
+  font-size: 0.95em;
+  line-height: 1.38;
+  color: var(--color-body);
+}
+.mosaic .legend .use {
+  font-family: var(--font-plate);
+  font-size: 0.9em;
+  font-style: italic;
+  color: var(--color-dim);
+}
+.mosaic .legend .ev {
+  font-family: var(--font-mono);
+  font-size: 0.76em;
+  line-height: 1.5;
+  color: var(--color-body);
+}
+.mosaic .legend .x {
+  color: var(--color-fault);
+}
+.mosaic .legend .ok {
+  color: var(--color-gold);
+}
+.mosaic .meta {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  font-family: var(--font-mono);
+  font-size: 0.7em;
+  color: var(--color-dim);
+}
+.mosaic .meta span:first-child {
+  min-width: 15ch;
+  text-align: right;
+}
+.mosaic .meta button {
+  padding: 0.25em 0.8em 0.35em;
+  border: 1px solid var(--color-rule);
+  background: none;
+  color: var(--color-print);
+  cursor: pointer;
+}
+.mosaic .meta button:hover {
+  border-color: var(--color-accent);
+}
+.mosaic .pkg button:focus-visible,
+.mosaic .meta button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+@container (max-height: 330px) {
+  .mosaic .seal .muted {
+    display: none;
+  }
+  .mosaic .seal .in {
+    grid-template-rows: auto auto auto 6.2em auto;
+  }
+}
+@container (max-height: 250px) {
+  .mosaic .seal .legend {
+    display: none;
+  }
+  .mosaic .seal .in {
+    grid-template-rows: auto auto auto auto;
+  }
+}
+
+.mosaic .status {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .mosaic {
+    display: grid;
+    flex: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto;
+    grid-auto-rows: clamp(124px, 20vw, 170px);
+    grid-auto-flow: dense;
+    gap: 4px;
+    min-height: 0;
+    padding: 4px;
+    background: linear-gradient(
+      135deg,
+      #5c4219 0%,
+      #a07a33 18%,
+      #e7c878 32%,
+      #fff0b8 40%,
+      #c69a45 55%,
+      #7d5a24 72%,
+      #d9b25e 88%,
+      #8a6a32 100%
+    );
+  }
+  .mosaic .tile,
+  .mosaic .seal {
+    position: relative;
+  }
+  .mosaic .tile.w2 {
+    grid-column: span 2;
+  }
+  .mosaic .tile.h2 {
+    grid-row: span 2;
+  }
+  .mosaic .tile.open {
+    grid-column: 1 / -1;
+    grid-row: span 2;
+  }
+  .mosaic .tile .label {
+    bottom: 8px;
+    left: 8px;
+    max-width: calc(100% - 16px);
+  }
+  .mosaic .tile:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -4px;
+  }
+  .mosaic .tile .desc {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: none;
+    align-content: center;
+    gap: 6px;
+    padding: 16px 18px;
+    background: rgb(19 17 15 / 0.93);
+    text-align: left;
+  }
+  .mosaic .tile.open .desc {
+    display: grid;
+  }
+  .mosaic .tile .desc b {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .mosaic .tile .desc span {
+    font-size: 15.5px;
+    line-height: 1.4;
+    color: var(--color-body);
+  }
+  .mosaic .tile .desc i {
+    font-family: var(--font-plate);
+    font-size: 14.5px;
+    color: var(--color-dim);
+  }
+  .mosaic .seal {
+    grid-column: 1 / -1;
+    container-type: inline-size;
+    padding-block: 18px 14px;
+  }
+  .mosaic .seal .in {
+    grid-template-rows: none;
+    padding: 0.6em 1.2em;
+    font-size: clamp(12px, 3.9cqw, 16px);
+  }
+  .mosaic .seal h1 {
+    font-size: min(26cqw, 170px);
+  }
+  .mosaic .pkg code {
+    text-align: left;
+  }
+  .mosaic .seal .legend {
+    height: 6.6em;
+  }
+  .mosaic .seams,
+  .mosaic .outline {
+    display: none;
+  }
+  /* The seal is the status at the top; once it has scrolled away, one line of it follows the page. */
+  .mosaic .status {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px max(16px, env(safe-area-inset-right)) max(9px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+    border-top: 1px solid var(--color-rule-strong);
+    background: rgb(19 17 15 / 0.96);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--color-body);
+  }
+  .mosaic .status > span:last-child {
+    flex: none;
+    color: var(--color-dim);
+  }
+  .mosaic .status .x {
+    color: var(--color-fault);
+  }
+  .mosaic .status .ok {
+    color: var(--color-gold);
+  }
 }

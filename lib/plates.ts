@@ -1,7 +1,8 @@
 // The plate renderer: an image set in an arched marble niche between two
 // fluted columns, with rays behind and an optional scraped treatment, printed
-// in two colours as live static. Pure functions over luminance buffers; the
-// component owns the canvas and the animation.
+// in two colours as live static, or a crop of an image printed edge to edge
+// as a tile. Pure functions over luminance buffers; the components own the
+// canvas and the animation.
 
 export const BONE: readonly [number, number, number] = [0xe6, 0xdd, 0xca];
 export const LAMP_BLACK: readonly [number, number, number] = [0x13, 0x11, 0x0f];
@@ -279,24 +280,100 @@ export function composeNiche(
   return luminance;
 }
 
-/** Prints luminance as static: each pixel against a fresh random threshold, in bone on lamp black. */
+/** What a print does to a plate beyond its tones, when the plate is failing. */
+export interface Disturbance {
+  /** How much of each pixel's tone is replaced by chance, 0 to 1. */
+  readonly noise?: number;
+  /** How far rows tear sideways, 0 to 1: bands of rows slide out of register. */
+  readonly tear?: number;
+  /** A buffer from an earlier print of the same size, to be written over instead of allocated. */
+  readonly buffer?: ImageData;
+}
+
+/**
+ * Prints luminance as static: each pixel against a fresh random threshold, in
+ * bone on lamp black. Returns the buffer it drew, which can be handed back
+ * through `disturbance.buffer` so a plate that re-rolls several times a second
+ * allocates one.
+ */
 export function printStatic(
   context: CanvasRenderingContext2D,
   w: number,
   h: number,
   luminance: Float32Array,
-  seed: number
-) {
-  const image = context.createImageData(w, h),
+  seed: number,
+  disturbance: Disturbance = {}
+): ImageData {
+  const { noise = 0, tear = 0 } = disturbance;
+  const image = disturbance.buffer ?? context.createImageData(w, h),
     data = image.data,
-    next = stream(seed);
-  for (let i = 0, p = 0; i < w * h; i++, p += 4) {
-    const v = Math.min(1, Math.max(0, (luminance[i] - 0.35) * 2.1 + 0.5));
-    const colour = v > next() ? BONE : LAMP_BLACK;
-    data[p] = colour[0];
-    data[p + 1] = colour[1];
-    data[p + 2] = colour[2];
-    data[p + 3] = 255;
+    next = stream(seed),
+    rows = tear > 0 ? stream(seed ^ 0x9e37) : null;
+  let band = 0,
+    shift = 0;
+  for (let y = 0; y < h; y++) {
+    if (rows && band-- <= 0) {
+      band = 3 + Math.floor(rows() * 18);
+      shift = rows() < 0.4 ? Math.round((rows() - 0.5) * 40 * tear) : 0;
+    }
+    const row = y * w;
+    for (let x = 0; x < w; x++) {
+      const at = row + Math.min(w - 1, Math.max(0, x + shift));
+      let v = Math.min(1, Math.max(0, (luminance[at] - 0.35) * 2.1 + 0.5));
+      if (noise > 0) v = v * (1 - noise) + next() * noise;
+      const colour = v > next() ? BONE : LAMP_BLACK,
+        p = (row + x) * 4;
+      data[p] = colour[0];
+      data[p + 1] = colour[1];
+      data[p + 2] = colour[2];
+      data[p + 3] = 255;
+    }
   }
   context.putImageData(image, 0, 0);
+  return image;
+}
+
+/** A rectangle of an image, as x, y, width, height in its pixels. */
+export type Crop = readonly [x: number, y: number, width: number, height: number];
+
+/**
+ * The tones of an image, or of the part of it a crop names, scaled to cover
+ * w × h (the overflow is cut off evenly). Stretched to the full range and
+ * inverted when asked, like `engraving`, and given a soft curve so the forms
+ * lift. A plate with no stone around it fills its tile edge to edge.
+ */
+export function tileTones(
+  image: CanvasImageSource & { width: number; height: number },
+  w: number,
+  h: number,
+  crop: Crop | undefined,
+  invert: boolean
+): Float32Array {
+  const [sx, sy, sw, sh] = crop ?? [0, 0, image.width, image.height];
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const context = canvas.getContext("2d", { willReadFrequently: true })!;
+  const scale = Math.max(w / sw, h / sh),
+    dw = sw * scale,
+    dh = sh * scale;
+  context.fillStyle = invert ? "#fff" : "#000";
+  context.fillRect(0, 0, w, h);
+  context.drawImage(image, sx, sy, sw, sh, (w - dw) / 2, (h - dh) / 2, dw, dh);
+  const data = context.getImageData(0, 0, w, h).data;
+  let lo = 255,
+    hi = 0;
+  for (let i = 0; i < w * h; i += 2) {
+    const v = data[i * 4];
+    if (v < lo) lo = v;
+    if (v > hi) hi = v;
+  }
+  const tones = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) {
+    let v = (data[i * 4] - lo) / Math.max(1, hi - lo);
+    if (invert) v = 1 - v;
+    const t = Math.min(1, Math.max(0, (v - 0.05) / 0.9));
+    tones[i] = t * t * (3 - 2 * t) * 0.95;
+  }
+  return tones;
 }
