@@ -284,10 +284,12 @@ function seams(
   const rnd = stream(0x601d),
     done = new Set<string>(),
     out: Inlay[] = [];
+  // The gold keeps its weight as the floor grows: thicker on a wide screen.
+  const scale = Math.min(1.9, Math.max(1.15, v[0]![floor.columns]![0] / 1000));
   const edge = (a: Point, b: Point, key: string) => {
     if (done.has(key)) return;
     done.add(key);
-    out.push(inlay(sampleLine(a, b, 9, 2.2, rnd), 4.2, rnd, 0));
+    out.push(inlay(sampleLine(a, b, 9, 2.2 * scale, rnd), 4.2 * scale, rnd, 0));
   };
   // An edge is named by its two ends, whichever way round it is walked.
   const key = (r1: number, c1: number, r2: number, c2: number) =>
@@ -338,14 +340,15 @@ export function mend(
         ];
   });
   const main = catmull(control, 8);
-  const trunk = inlay(main, 5.6, rnd, 7);
+  const scale = Math.min(1.8, Math.max(1.1, Math.min(width, height) / 110));
+  const trunk = inlay(main, 5.6 * scale, rnd, 7);
   const a = main[Math.floor(main.length * (0.3 + f[9]! * 0.4))]!,
     b: Point = [
       a[0] + (f[10]! - 0.5) * width * 0.34,
       a[1] + (f[8]! - 0.2) * height * 0.42,
     ],
     mid: Point = [(a[0] + b[0]) / 2 + (f[7]! - 0.5) * 24, (a[1] + b[1]) / 2];
-  return [trunk, inlay(catmull([a, mid, b], 8), 2.8, rnd, 3)];
+  return [trunk, inlay(catmull([a, mid, b], 8), 2.8 * scale, rnd, 3)];
 }
 
 /** One failure of the sequence: which tile fails, and the crack it is mended with. */
