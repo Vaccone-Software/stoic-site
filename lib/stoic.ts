@@ -195,12 +195,17 @@ export interface RenderedRelease {
 }
 
 const perPage = 100;
+const builtAt = Date.now();
 
 async function fetchReleases(): Promise<readonly Release[]> {
   const token = process.env.GITHUB_TOKEN;
   const all: Release[] = [];
   for (let page = 1; ; page++) {
-    const url = `https://api.github.com/repos/${repository}/releases?per_page=${perPage}&page=${page}`;
+    // Next keeps fetched data in .next/cache between builds and reuses it for
+    // the same URL, which would hand this build the releases of an earlier
+    // one (and the home page a version that is out of date). GitHub ignores
+    // the parameter; it makes each build's request its own.
+    const url = `https://api.github.com/repos/${repository}/releases?per_page=${perPage}&page=${page}&build=${builtAt}`;
     let response: Response;
     try {
       response = await fetch(url, {
@@ -264,3 +269,18 @@ export const loadReleases = (): Promise<readonly RenderedRelease[]> =>
       })
     );
   })());
+
+/**
+ * The version Stoic is at: the tag of its newest published release, which
+ * `Package.swift` consumers write after `from:`. Read at build time with the
+ * changelog's releases, so the site cannot name a version that is not out.
+ */
+export const loadVersion = async (): Promise<string> => {
+  const [latest] = await loadReleases();
+  if (!latest)
+    throw new Error(`${repositoryUrl} has no published release, so the site cannot say which version to install.`);
+  const version = latest.tag.replace(/^v/, "");
+  if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version))
+    throw new Error(`The newest release of ${repository} is tagged "${latest.tag}", which is not a version.`);
+  return version;
+};
