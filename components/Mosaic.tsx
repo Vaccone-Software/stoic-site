@@ -8,6 +8,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import Link from "next/link";
 import {
   SEED,
   SWELL,
@@ -712,6 +713,7 @@ export function Mosaic({
             <button type="button" onClick={replay}>
               Replay
             </button>
+            <Link href="/credits/">Credits</Link>
           </div>
         </div>
       </div>

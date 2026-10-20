@@ -490,8 +490,17 @@ canvas[role="img"] {
 .mosaic .meta button:hover {
   border-color: var(--color-accent);
 }
+.mosaic .meta a {
+  color: var(--color-dim);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.mosaic .meta a:hover {
+  color: var(--color-print);
+}
 .mosaic .pkg button:focus-visible,
-.mosaic .meta button:focus-visible {
+.mosaic .meta button:focus-visible,
+.mosaic .meta a:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }

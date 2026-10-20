@@ -1,5 +1,4 @@
 import { Mosaic } from "@/components/Mosaic";
-import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { plateById, site } from "@/content/site";
 import { loadVersion } from "@/lib/stoic";
@@ -24,7 +23,7 @@ export default async function Home() {
   }));
   return (
     <>
-      {/* The first screen is the whole floor, under the header. */}
+      {/* The page is the whole floor, under the header; the credits are their own page. */}
       <div className="flex min-h-svh flex-col">
         <div className="border-b border-rule">
           <div className="mx-auto w-full max-w-[1180px] px-5 py-5 md:px-10 lg:px-12">
@@ -45,37 +44,6 @@ export default async function Home() {
           />
         </main>
       </div>
-
-      <SiteFooter>
-        <details className="font-mono text-xs text-dim">
-          <summary className="cursor-pointer hover:text-print">
-            Image credits
-          </summary>
-          <ul className="mt-3 grid gap-1">
-            {site.plates.map((plate) => (
-              <li key={plate.id}>
-                Pl. {plate.numeral}: {plate.credit} ({plate.license}).
-                {plate.source && (
-                  <>
-                    {" "}
-                    <a
-                      href={plate.source}
-                      className="underline underline-offset-2 hover:text-print"
-                    >
-                      Source
-                    </a>
-                    .
-                  </>
-                )}
-              </li>
-            ))}
-          </ul>
-          <p className="mt-3">
-            Each plate is re-printed as live static, in two colours and cropped
-            to its tile; the gold seams and cracks are drawn.
-          </p>
-        </details>
-      </SiteFooter>
     </>
   );
 }
